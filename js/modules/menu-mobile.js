@@ -3,7 +3,7 @@ import outsideClick from "./outsideClick.js";
 export default function initMenuMobile() {
   const menu = document.querySelector("#menu");
   const btn = document.querySelector('[data-menu="button"]');
-  const eventos = ["click", "touchstart"];
+  const eventos = ["click"];
   function openMenu() {
     menu.classList.add("ativo");
     btn.classList.add("ativo");
@@ -13,6 +13,7 @@ export default function initMenuMobile() {
     });
   }
   if (btn) {
-    eventos.forEach((evento) => btn.addEventListener(evento, openMenu));
+    // eventos.forEach((evento) => btn.addEventListener(evento, openMenu));
+    btn.addEventListener("click", openMenu);
   }
 }
