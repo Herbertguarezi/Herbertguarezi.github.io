@@ -1,38 +1,51 @@
-export default function initTolltip() {
-  const tolltips = document.querySelectorAll("[data-tolltip]");
-  const onMouseMove = {
-    handleEvent(event) {
-      this.tolltipbox.style.top = `${event.pageY + 20}px`;
-      this.tolltipbox.style.left = `${event.pageX + 20}px`;
-    },
-  };
-  const onMouseOut = {
-    handleEvent() {
-      this.tolltipbox.remove();
-      this.element.removeEventListener("mouseleave", onMouseOut);
-      this.element.removeEventListener("mousemove", onMouseMove);
-    },
-  };
+export default class Tolltip {
+  constructor(tolltips) {
+    this.tolltips = document.querySelectorAll(tolltips);
 
-  function criarTolltipBox(element) {
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseOut = this.onMouseOut.bind(this);
+    this.onMouseOver = this.onMouseOver.bind(this);
+  }
+  onMouseMove({ pageY, pageX }) {
+    this.tolltipbox.style.top = `${pageY + 20}px`;
+    if (pageX + 240 > window.innerWidth) {
+      this.tolltipbox.style.left = `${pageX - 190}px`;
+    } else {
+      this.tolltipbox.style.left = `${pageX + 20}px`;
+    }
+  }
+  onMouseOut({ currentTarget }) {
+    this.tolltipbox.remove();
+    currentTarget.removeEventListener("mouseleave", this.onMouseOut);
+    currentTarget.removeEventListener("mousemove", this.onMouseMove);
+  }
+
+  // cria a tolltip box e coloca no body
+  criarTolltipBox(element) {
     const tolltipbox = document.createElement("div");
     const text = element.getAttribute("aria-label");
     tolltipbox.classList.add("tolltip");
     tolltipbox.innerText = text;
     document.body.appendChild(tolltipbox);
-    return tolltipbox;
+    this.tolltipbox = tolltipbox;
   }
-  function onMouseOver() {
-    const tolltipbox = criarTolltipBox(this);
+  onMouseOver({ currentTarget }) {
+    // cria a tolltip box e coloca em uma propriedade
+    this.criarTolltipBox(currentTarget);
+    currentTarget.addEventListener("mouseleave", this.onMouseOut);
+    currentTarget.addEventListener("mousemove", this.onMouseMove);
+  }
 
-    onMouseOut.tolltipbox = tolltipbox;
-    onMouseOut.element = this;
-    this.addEventListener("mouseleave", onMouseOut);
-    onMouseMove.tolltipbox = tolltipbox;
-    this.addEventListener("mousemove", onMouseMove);
+  addTolltipsEvents() {
+    this.tolltips.forEach((i) => {
+      i.addEventListener("mouseover", this.onMouseOver);
+      // i.addEventListener("mousemove", this.onMouseMove);
+    });
   }
-  tolltips.forEach((i) => {
-    i.addEventListener("mouseover", onMouseOver);
-    i.addEventListener("mousemove", onMouseMove);
-  });
+
+  init() {
+    if (this.tolltips.length) {
+      this.addTolltipsEvents();
+    }
+  }
 }
